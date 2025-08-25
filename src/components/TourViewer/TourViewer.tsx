@@ -4,13 +4,20 @@ import PanoramaScene from './PanoramaScene'
 import NavigationControls from './NavigationControls'
 import EditorToolbar from '../HotspotEditor/EditorToolbar'
 import HotspotPropertiesPanel from '../HotspotEditor/HotspotPropertiesPanel'
+import RouteCanvas from '../RouteDrawer/RouteCanvas'
+import DrawingToolbar from '../RouteDrawer/DrawingToolbar'
+import StylePanel from '../RouteDrawer/StylePanel'
+import LayersPanel from '../RouteDrawer/LayersPanel'
+import RouteEditPanel from '../RouteDrawer/RouteEditPanel'
 import { useTourStore, useCurrentScene } from '../../stores/tourStore'
 import { useEditorStore } from '../../stores/editorStore'
+import { useRouteEditorStore } from '../../stores/routeEditorStore'
 
 const TourViewer: React.FC = () => {
   const { currentTour } = useTourStore()
   const currentScene = useCurrentScene()
   const { mode, showHotspotPanel } = useEditorStore()
+  const { isDrawingMode } = useRouteEditorStore()
 
   return (
     <div className="bg-gray-800 rounded-lg p-6 text-white">
@@ -69,14 +76,23 @@ const TourViewer: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation controls - solo en modo preview */}
-        {mode === 'preview' && <NavigationControls />}
+        {/* Route drawing overlay */}
+        <RouteCanvas />
+        
+        {/* Navigation controls - solo en modo preview sin dibujo */}
+        {mode === 'preview' && !isDrawingMode && <NavigationControls />}
         
         {/* Editor toolbar */}
         <EditorToolbar />
         
         {/* Hotspot properties panel */}
         {showHotspotPanel && <HotspotPropertiesPanel />}
+        
+        {/* Route drawing components */}
+        <DrawingToolbar />
+        <StylePanel />
+        <LayersPanel />
+        <RouteEditPanel />
       </div>
     </div>
   )

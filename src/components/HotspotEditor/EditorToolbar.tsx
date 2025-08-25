@@ -1,5 +1,6 @@
 import React from 'react'
 import { useEditorStore, HotspotTool } from '../../stores/editorStore'
+import { useRouteEditorStore } from '../../stores/routeEditorStore'
 
 const EditorToolbar: React.FC = () => {
   const { 
@@ -10,6 +11,8 @@ const EditorToolbar: React.FC = () => {
     startPlacingHotspot, 
     cancelPlacingHotspot 
   } = useEditorStore()
+  
+  const { isDrawingMode, setDrawingMode } = useRouteEditorStore()
 
   const toggleMode = () => {
     setMode(mode === 'preview' ? 'edit' : 'preview')
@@ -87,6 +90,23 @@ const EditorToolbar: React.FC = () => {
               <span>{getToolLabel(tool)}</span>
             </button>
           ))}
+        </div>
+
+        <div className="border-t border-gray-600 pt-2">
+          <div className="text-white text-xs mb-2 font-medium">Editor de Rutas:</div>
+          
+          <button
+            onClick={() => setDrawingMode(!isDrawingMode)}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${
+              isDrawingMode
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+            }`}
+            title="Activar editor de rutas de escalada"
+          >
+            <span>🎨</span>
+            <span>Dibujar Rutas</span>
+          </button>
         </div>
 
         {isPlacingHotspot && (
