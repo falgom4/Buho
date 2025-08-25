@@ -1,0 +1,42 @@
+<svg width="2048" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="30%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="100%" style="stop-color:#4682B4"/>
+    </radialGradient>
+    <linearGradient id="ground" x1="0%" y1="60%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#228B22"/>
+      <stop offset="100%" style="stop-color:#006400"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Sky -->
+  <rect width="2048" height="600" fill="url(#sky)"/>
+  
+  <!-- Ground -->
+  <rect y="600" width="2048" height="424" fill="url(#ground)"/>
+  
+  <!-- Mountains in background -->
+  <polygon points="0,600 400,400 800,500 1200,350 1600,450 2048,380 2048,600" fill="#696969"/>
+  
+  <!-- Trees -->
+  <ellipse cx="300" cy="550" rx="50" ry="80" fill="#228B22"/>
+  <ellipse cx="700" cy="580" rx="40" ry="60" fill="#228B22"/>
+  <ellipse cx="1200" cy="560" rx="60" ry="90" fill="#228B22"/>
+  <ellipse cx="1500" cy="570" rx="45" ry="70" fill="#228B22"/>
+  
+  <!-- Clouds -->
+  <ellipse cx="400" cy="200" rx="80" ry="30" fill="white" opacity="0.8"/>
+  <ellipse cx="1200" cy="250" rx="120" ry="40" fill="white" opacity="0.8"/>
+  <ellipse cx="1800" cy="180" rx="100" ry="35" fill="white" opacity="0.8"/>
+  
+  <!-- Title -->
+  <text x="1024" y="512" text-anchor="middle" fill="white" font-size="64" font-family="Arial" stroke="#000" stroke-width="2">
+    🦉 BUHO PANORAMA DEMO
+  </text>
+  
+  <!-- Instructions -->
+  <text x="1024" y="580" text-anchor="middle" fill="white" font-size="32" font-family="Arial" stroke="#000" stroke-width="1">
+    Arrastra para explorar el tour virtual
+  </text>
+</svg>
