@@ -14,6 +14,11 @@ interface TourState {
   removeScene: (sceneId: string) => void
   updateScene: (sceneId: string, updates: Partial<Scene>) => void
   navigateToScene: (sceneId: string) => void
+  
+  // Hotspot actions
+  addHotspotToScene: (sceneId: string, hotspot: Hotspot) => void
+  updateHotspot: (sceneId: string, hotspotId: string, updates: Partial<Hotspot>) => void
+  removeHotspot: (sceneId: string, hotspotId: string) => void
 }
 
 // Datos de ejemplo para desarrollo
@@ -112,7 +117,36 @@ export const useTourStore = create<TourState>((set, get) => ({
         set({ loading: false })
       }, 500)
     }
-  }
+  },
+
+  addHotspotToScene: (sceneId, hotspot) => set((state) => ({
+    scenes: state.scenes.map(scene => 
+      scene.id === sceneId 
+        ? { ...scene, hotspots: [...scene.hotspots, hotspot] }
+        : scene
+    )
+  })),
+
+  updateHotspot: (sceneId, hotspotId, updates) => set((state) => ({
+    scenes: state.scenes.map(scene => 
+      scene.id === sceneId 
+        ? {
+            ...scene, 
+            hotspots: scene.hotspots.map(hotspot => 
+              hotspot.id === hotspotId ? { ...hotspot, ...updates } : hotspot
+            )
+          }
+        : scene
+    )
+  })),
+
+  removeHotspot: (sceneId, hotspotId) => set((state) => ({
+    scenes: state.scenes.map(scene => 
+      scene.id === sceneId 
+        ? { ...scene, hotspots: scene.hotspots.filter(h => h.id !== hotspotId) }
+        : scene
+    )
+  }))
 }))
 
 // Selector helpers
