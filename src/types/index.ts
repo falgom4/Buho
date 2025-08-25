@@ -23,6 +23,10 @@ export interface Hotspot {
   content?: string;
   target?: string;
   icon: string;
+  // Propiedades específicas para hotspots de ruta
+  routeId?: string;
+  difficulty?: string;
+  grade?: string;
 }
 
 export interface Route {

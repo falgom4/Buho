@@ -4,6 +4,7 @@ import { Text, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { Hotspot as HotspotType } from '../../types'
 import { useTourStore } from '../../stores/tourStore'
+import { useEditorStore } from '../../stores/editorStore'
 
 interface HotspotProps {
   hotspot: HotspotType
@@ -13,21 +14,37 @@ const Hotspot: React.FC<HotspotProps> = ({ hotspot }) => {
   const meshRef = useRef<THREE.Mesh>(null)
   const [hovered, setHovered] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  
   const navigateToScene = useTourStore(state => state.navigateToScene)
+  const { mode, selectedHotspotId, setSelectedHotspot } = useEditorStore()
+  
+  const isSelected = selectedHotspotId === hotspot.id
+  const isEditMode = mode === 'edit'
 
   // Animación de pulsación
   useFrame((state) => {
     if (meshRef.current) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1
-      meshRef.current.scale.setScalar(hovered ? scale * 1.2 : scale)
+      const baseScale = isSelected ? 1.3 : 1
+      const pulseScale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1
+      meshRef.current.scale.setScalar((hovered ? baseScale * 1.2 : baseScale) * pulseScale)
     }
   })
 
-  const handleClick = () => {
-    if (hotspot.type === 'navigation' && hotspot.target) {
-      navigateToScene(hotspot.target)
-    } else if (hotspot.type === 'info') {
-      setShowInfo(!showInfo)
+  const handleClick = (event: any) => {
+    event.stopPropagation()
+    
+    if (isEditMode) {
+      // En modo edición, seleccionar para editar propiedades
+      setSelectedHotspot(isSelected ? null : hotspot.id)
+    } else {
+      // En modo preview, ejecutar acción del hotspot
+      if (hotspot.type === 'navigation' && hotspot.target) {
+        navigateToScene(hotspot.target)
+      } else if (hotspot.type === 'info') {
+        setShowInfo(!showInfo)
+      } else if (hotspot.type === 'route') {
+        setShowInfo(!showInfo)
+      }
     }
   }
 
@@ -44,7 +61,7 @@ const Hotspot: React.FC<HotspotProps> = ({ hotspot }) => {
     switch (hotspot.type) {
       case 'navigation': return '→'
       case 'info': return 'ℹ'
-      case 'route': return '⛰'
+      case 'route': return '🧗'
       default: return '●'
     }
   }
@@ -60,9 +77,9 @@ const Hotspot: React.FC<HotspotProps> = ({ hotspot }) => {
       >
         <sphereGeometry args={[0.1, 16, 16]} />
         <meshBasicMaterial 
-          color={getHotspotColor()} 
+          color={isSelected ? '#FF5722' : getHotspotColor()} 
           transparent 
-          opacity={hovered ? 0.9 : 0.7}
+          opacity={hovered ? 0.9 : (isSelected ? 0.8 : 0.7)}
         />
       </mesh>
 
@@ -81,19 +98,34 @@ const Hotspot: React.FC<HotspotProps> = ({ hotspot }) => {
       </Text>
 
       {/* Tooltip/Info panel */}
-      {(hovered || showInfo) && (
+      {(hovered || showInfo || isSelected) && (
         <Html
           position={[0, 0.3, 0]}
           transform
           sprite
         >
-          <div className="bg-black bg-opacity-80 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap max-w-xs">
+          <div className={`text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap max-w-xs ${
+            isSelected ? 'bg-orange-600 bg-opacity-90' : 'bg-black bg-opacity-80'
+          }`}>
             <div className="font-semibold">{hotspot.title}</div>
             {hotspot.content && (
               <div className="text-gray-300 text-xs mt-1">{hotspot.content}</div>
             )}
-            {hotspot.type === 'navigation' && (
-              <div className="text-green-400 text-xs mt-1">Click para navegar</div>
+            {hotspot.type === 'route' && hotspot.difficulty && (
+              <div className="text-orange-400 text-xs mt-1">
+                Grado: {hotspot.difficulty}
+              </div>
+            )}
+            {isEditMode ? (
+              <div className="text-yellow-400 text-xs mt-1">
+                {isSelected ? 'Seleccionado - Ver panel propiedades' : 'Click para editar'}
+              </div>
+            ) : (
+              <div className="text-green-400 text-xs mt-1">
+                {hotspot.type === 'navigation' ? 'Click para navegar' : 
+                 hotspot.type === 'route' ? 'Click para ver ruta' :
+                 'Click para más información'}
+              </div>
             )}
           </div>
         </Html>
