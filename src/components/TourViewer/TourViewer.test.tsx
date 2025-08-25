@@ -15,9 +15,9 @@ vi.mock('./PanoramaScene', () => ({
 }))
 
 describe('TourViewer', () => {
-  it('renders tour viewer title', () => {
+  it('renders tour title', () => {
     render(<TourViewer />)
-    expect(screen.getByText('Tour Viewer')).toBeInTheDocument()
+    expect(screen.getByText('Demo Tour - Boulder El Mirador')).toBeInTheDocument()
   })
 
   it('renders three.js canvas', () => {
@@ -30,9 +30,14 @@ describe('TourViewer', () => {
     expect(screen.getByTestId('panorama-scene')).toBeInTheDocument()
   })
 
-  it('shows instructions overlay', () => {
+  it('shows current scene info', () => {
     render(<TourViewer />)
-    expect(screen.getByText('🦉 Buho Tour Viewer')).toBeInTheDocument()
-    expect(screen.getByText('Arrastra para explorar • Three.js activo')).toBeInTheDocument()
+    expect(screen.getByText('🦉 Boulder Principal')).toBeInTheDocument()
+    expect(screen.getByText('Arrastra para explorar • Rueda para zoom • Click hotspots')).toBeInTheDocument()
+  })
+
+  it('shows navigation controls', () => {
+    render(<TourViewer />)
+    expect(screen.getByText('1 de 2')).toBeInTheDocument()
   })
 })

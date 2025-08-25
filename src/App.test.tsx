@@ -15,6 +15,12 @@ describe('App', () => {
 
   it('renders tour viewer section', () => {
     render(<App />)
-    expect(screen.getByText('Tour Viewer')).toBeInTheDocument()
+    expect(screen.getByText('Demo Tour - Boulder El Mirador')).toBeInTheDocument()
+  })
+
+  it('renders scene navigation', () => {
+    render(<App />)
+    expect(screen.getByText('Boulder Principal')).toBeInTheDocument()
+    expect(screen.getByText('1 de 2')).toBeInTheDocument()
   })
 })
