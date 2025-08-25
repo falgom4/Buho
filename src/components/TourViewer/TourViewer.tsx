@@ -2,11 +2,15 @@ import React, { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import PanoramaScene from './PanoramaScene'
 import NavigationControls from './NavigationControls'
+import EditorToolbar from '../HotspotEditor/EditorToolbar'
+import HotspotPropertiesPanel from '../HotspotEditor/HotspotPropertiesPanel'
 import { useTourStore, useCurrentScene } from '../../stores/tourStore'
+import { useEditorStore } from '../../stores/editorStore'
 
 const TourViewer: React.FC = () => {
   const { currentTour } = useTourStore()
   const currentScene = useCurrentScene()
+  const { mode, showHotspotPanel } = useEditorStore()
 
   return (
     <div className="bg-gray-800 rounded-lg p-6 text-white">
@@ -36,9 +40,19 @@ const TourViewer: React.FC = () => {
         
         {/* Info overlay */}
         <div className="absolute top-4 left-4 bg-black bg-opacity-50 rounded px-3 py-2 text-sm">
-          <div className="text-white">🦉 {currentScene?.name || 'Buho Tour Viewer'}</div>
+          <div className="text-white">
+            🦉 {currentScene?.name || 'Buho Tour Viewer'}
+            {mode === 'edit' && (
+              <span className="ml-2 bg-orange-600 px-2 py-1 rounded text-xs">
+                MODO EDICIÓN
+              </span>
+            )}
+          </div>
           <div className="text-gray-300 text-xs">
-            Arrastra para explorar • Rueda para zoom • Click hotspots
+            {mode === 'edit' 
+              ? 'Click para editar hotspots • Selecciona herramientas' 
+              : 'Arrastra para explorar • Rueda para zoom • Click hotspots'
+            }
           </div>
         </div>
 
@@ -55,8 +69,14 @@ const TourViewer: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation controls */}
-        <NavigationControls />
+        {/* Navigation controls - solo en modo preview */}
+        {mode === 'preview' && <NavigationControls />}
+        
+        {/* Editor toolbar */}
+        <EditorToolbar />
+        
+        {/* Hotspot properties panel */}
+        {showHotspotPanel && <HotspotPropertiesPanel />}
       </div>
     </div>
   )

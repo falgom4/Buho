@@ -3,6 +3,7 @@ import { useLoader, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { usePanoramaControls } from '../../hooks/usePanoramaControls'
 import { useCurrentScene } from '../../stores/tourStore'
+import { useHotspotPlacer } from '../../hooks/useHotspotPlacer'
 import Hotspot from './Hotspot'
 
 interface PanoramaSceneProps {
@@ -14,6 +15,7 @@ const PanoramaScene: React.FC<PanoramaSceneProps> = ({ imageUrl }) => {
   const currentScene = useCurrentScene()
   
   usePanoramaControls()
+  const { handleCanvasClick } = useHotspotPlacer()
 
   // Usar imagen de la escena actual o fallback
   const panoramaUrl = imageUrl || currentScene?.panoramaUrl || '/placeholder-panorama.svg'
@@ -28,6 +30,15 @@ const PanoramaScene: React.FC<PanoramaSceneProps> = ({ imageUrl }) => {
       texture.wrapT = THREE.ClampToEdgeWrapping
     }
   }, [texture])
+
+  // Agregar event listener para colocación de hotspots
+  useEffect(() => {
+    const canvas = document.querySelector('canvas')
+    if (canvas) {
+      canvas.addEventListener('click', handleCanvasClick)
+      return () => canvas.removeEventListener('click', handleCanvasClick)
+    }
+  }, [handleCanvasClick])
 
   // Rotar la geometría para que se vea correctamente
   useFrame(() => {
