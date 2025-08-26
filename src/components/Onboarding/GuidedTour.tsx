@@ -288,7 +288,7 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
       </div>
 
       {/* Global styles for tour highlighting */}
-      <style jsx global>{`
+      <style>{`
         .tour-highlight {
           position: relative;
           z-index: 45;

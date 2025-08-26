@@ -1,5 +1,6 @@
 export interface Tour {
   id: string;
+  name: string;
   title: string;
   description: string;
   scenes: Scene[];
@@ -10,9 +11,20 @@ export interface Tour {
 export interface Scene {
   id: string;
   name: string;
+  description?: string;
   panoramaUrl: string;
+  thumbnail?: string;
   hotspots: Hotspot[];
   routes: Route[];
+  metadata?: SceneMetadata;
+}
+
+export interface SceneMetadata {
+  width?: number;
+  height?: number;
+  fileSize?: number;
+  format?: string;
+  equipment?: string;
 }
 
 export interface Hotspot {

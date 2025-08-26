@@ -98,7 +98,7 @@ const LoadingScreen: React.FC = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .animation-delay-200 {
           animation-delay: 200ms;
         }

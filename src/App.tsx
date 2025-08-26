@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useProjectStore } from './stores/projectStore'
 import { useTourStore } from './stores/tourStore'
 import { useEditorStore } from './stores/editorStore'
