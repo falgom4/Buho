@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useEditorStore, HotspotTool } from '../../stores/editorStore'
 import { useRouteEditorStore } from '../../stores/routeEditorStore'
+import TourValidator from '../TourValidator/TourValidator'
+import TourPreview from '../TourPreview/TourPreview'
 
 const EditorToolbar: React.FC = () => {
   const { 
@@ -13,6 +15,8 @@ const EditorToolbar: React.FC = () => {
   } = useEditorStore()
   
   const { isDrawingMode, setDrawingMode } = useRouteEditorStore()
+  const [showValidator, setShowValidator] = useState(false)
+  const [showFullPreview, setShowFullPreview] = useState(false)
 
   const toggleMode = () => {
     setMode(mode === 'preview' ? 'edit' : 'preview')
@@ -49,27 +53,64 @@ const EditorToolbar: React.FC = () => {
 
   if (mode === 'preview') {
     return (
-      <div className="absolute top-4 right-4 z-10">
-        <button
-          onClick={toggleMode}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          ✏️ Editar
-        </button>
-      </div>
+      <>
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          <button
+            onClick={() => setShowValidator(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            🔍 Validar
+          </button>
+          <button
+            onClick={() => setShowFullPreview(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            👁️ Preview
+          </button>
+          <button
+            onClick={toggleMode}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            ✏️ Editar
+          </button>
+        </div>
+        
+        <TourValidator 
+          isOpen={showValidator}
+          onClose={() => setShowValidator(false)}
+        />
+        
+        <TourPreview
+          isOpen={showFullPreview}
+          onClose={() => setShowFullPreview(false)}
+          onEdit={() => {
+            setShowFullPreview(false)
+            toggleMode()
+          }}
+        />
+      </>
     )
   }
 
   return (
     <div className="absolute top-4 right-4 z-10 bg-black bg-opacity-80 rounded-lg p-3">
       <div className="flex flex-col gap-2">
-        {/* Toggle mode button */}
-        <button
-          onClick={toggleMode}
-          className="bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
-        >
-          👁️ Vista Previa
-        </button>
+        {/* Quick actions */}
+        <div className="flex gap-1">
+          <button
+            onClick={() => setShowValidator(true)}
+            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-2 py-2 rounded text-xs font-medium transition-colors"
+            title="Validar tour"
+          >
+            🔍
+          </button>
+          <button
+            onClick={toggleMode}
+            className="flex-1 bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+          >
+            👁️ Vista Previa
+          </button>
+        </div>
         
         <div className="border-t border-gray-600 pt-2">
           <div className="text-white text-xs mb-2 font-medium">Agregar Hotspot:</div>
@@ -127,9 +168,18 @@ const EditorToolbar: React.FC = () => {
         </div>
       </div>
       
-      <ProjectManager 
-        isOpen={showProjectManager}
-        onClose={() => setShowProjectManager(false)}
+      <TourValidator 
+        isOpen={showValidator}
+        onClose={() => setShowValidator(false)}
+      />
+      
+      <TourPreview
+        isOpen={showFullPreview}
+        onClose={() => setShowFullPreview(false)}
+        onEdit={() => {
+          setShowFullPreview(false)
+          setMode('edit')
+        }}
       />
     </>
   )
