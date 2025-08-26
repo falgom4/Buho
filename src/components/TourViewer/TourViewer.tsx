@@ -14,6 +14,7 @@ import { useTourStore, useCurrentScene } from '../../stores/tourStore'
 import { useEditorStore } from '../../stores/editorStore'
 import { useRouteEditorStore } from '../../stores/routeEditorStore'
 import { useSidePanels } from '../../hooks/useSidePanels'
+import { useResponsive } from '../../hooks/useResponsive'
 
 const TourViewer: React.FC = () => {
   const { currentTour } = useTourStore()
@@ -21,6 +22,7 @@ const TourViewer: React.FC = () => {
   const { mode, showHotspotPanel } = useEditorStore()
   const { isDrawingMode } = useRouteEditorStore()
   const { panels, togglePanel, contentMargin } = useSidePanels()
+  const { isMobile, isTablet, shouldAutoHidePanels } = useResponsive()
 
   // Mostrar loading si no hay tour o escena
   if (!currentTour || !currentScene) {
@@ -85,13 +87,17 @@ const TourViewer: React.FC = () => {
         
         {/* Scene info - Solo en modo preview y cuando no hay paneles */}
         {mode === 'preview' && !panels.right.isOpen && (
-          <div className="absolute top-6 left-6 z-10">
-            <div className="bg-black bg-opacity-60 backdrop-blur-sm rounded-xl px-4 py-3 text-white">
+          <div className={`absolute top-4 left-4 z-10 ${isMobile ? 'max-w-[250px]' : ''}`}>
+            <div className={`bg-black bg-opacity-60 backdrop-blur-sm rounded-xl text-white ${
+              isMobile ? 'px-3 py-2' : 'px-4 py-3'
+            }`}>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <div>
-                  <div className="font-semibold">{currentScene.name}</div>
-                  {currentScene.description && (
+                <div className="min-w-0 flex-1">
+                  <div className={`font-semibold truncate ${isMobile ? 'text-sm' : ''}`}>
+                    {currentScene.name}
+                  </div>
+                  {currentScene.description && !isMobile && (
                     <div className="text-xs text-gray-300 max-w-xs truncate">
                       {currentScene.description}
                     </div>
@@ -104,9 +110,11 @@ const TourViewer: React.FC = () => {
 
         {/* Quick stats - Solo en modo edición */}
         {mode === 'edit' && !panels.right.isOpen && (
-          <div className="absolute top-6 right-6 z-10">
-            <div className="bg-black bg-opacity-60 backdrop-blur-sm rounded-xl px-4 py-3 text-white">
-              <div className="flex items-center gap-4 text-sm">
+          <div className="absolute top-4 right-4 z-10">
+            <div className={`bg-black bg-opacity-60 backdrop-blur-sm rounded-xl text-white ${
+              isMobile ? 'px-3 py-2' : 'px-4 py-3'
+            }`}>
+              <div className={`flex items-center gap-4 ${isMobile ? 'text-xs' : 'text-sm'}`}>
                 <div className="flex items-center gap-1">
                   <span>🔗</span>
                   <span>{currentScene.hotspots.length}</span>
@@ -118,7 +126,7 @@ const TourViewer: React.FC = () => {
                 {isDrawingMode && (
                   <div className="flex items-center gap-1 text-green-400">
                     <span>🎨</span>
-                    <span>Dibujando</span>
+                    {!isMobile && <span>Dibujando</span>}
                   </div>
                 )}
               </div>
@@ -147,8 +155,8 @@ const TourViewer: React.FC = () => {
           </>
         )}
 
-        {/* Help hint - Solo se muestra brevemente */}
-        {mode === 'preview' && !panels.left.isOpen && !panels.right.isOpen && (
+        {/* Help hint - Solo se muestra brevemente en desktop */}
+        {mode === 'preview' && !isMobile && !panels.left.isOpen && !panels.right.isOpen && (
           <div className="absolute bottom-6 left-6 z-10">
             <div className="bg-black bg-opacity-40 backdrop-blur-sm rounded-lg px-3 py-2 text-white text-xs animate-fade-in">
               <div className="flex items-center gap-2">

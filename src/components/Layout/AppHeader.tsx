@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Project } from '../../stores/projectStore'
 import { Tour } from '../../types'
+import { useResponsive } from '../../hooks/useResponsive'
 
 interface AppHeaderProps {
   currentProject: Project | null
@@ -15,7 +16,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   editorMode,
   onOpenProjects
 }) => {
-  const [isCompact, setIsCompact] = useState(false)
+  const { isMobile, isTablet } = useResponsive()
+  const [isCompact, setIsCompact] = useState(isMobile)
 
   const getModeColor = () => {
     return editorMode === 'edit' 
@@ -31,24 +33,28 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     <header className={`bg-white border-b border-gray-200 transition-all duration-200 ${
       isCompact ? 'py-2' : 'py-4'
     }`}>
-      <div className="max-w-7xl mx-auto px-6">
+      <div className={`max-w-7xl mx-auto ${isMobile ? 'px-4' : 'px-6'}`}>
         <div className="flex items-center justify-between">
           {/* Logo y proyecto actual */}
-          <div className="flex items-center gap-6">
+          <div className={`flex items-center ${isMobile ? 'gap-3' : 'gap-6'}`}>
             {/* Logo */}
             <div 
               className="flex items-center gap-3 cursor-pointer group"
               onClick={() => setIsCompact(!isCompact)}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-lg">🏔️</span>
+              <div className={`bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center ${
+                isMobile ? 'w-7 h-7' : 'w-8 h-8'
+              }`}>
+                <span className={`text-white ${isMobile ? 'text-base' : 'text-lg'}`}>🏔️</span>
               </div>
               {!isCompact && (
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                  <h1 className={`font-bold text-gray-900 group-hover:text-blue-600 transition-colors ${
+                    isMobile ? 'text-lg' : 'text-xl'
+                  }`}>
                     Buho Editor
                   </h1>
-                  <p className="text-xs text-gray-500">Tours Virtuales</p>
+                  {!isMobile && <p className="text-xs text-gray-500">Tours Virtuales</p>}
                 </div>
               )}
             </div>
@@ -60,23 +66,28 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
             {/* Información del proyecto actual */}
             {currentProject && (
-              <div className="flex items-center gap-3">
+              <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-3'}`}>
                 <button
                   onClick={onOpenProjects}
                   className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{
+                    <span className={isMobile ? 'text-base' : 'text-lg'}>{
                       currentProject.category === 'boulder' ? '🪨' :
                       currentProject.category === 'sport' ? '🧗‍♀️' :
                       currentProject.category === 'trad' ? '⚙️' : '🏔️'
                     }</span>
                     {!isCompact && (
                       <div>
-                        <div className="font-semibold text-sm group-hover:text-blue-600 transition-colors">
-                          {currentProject.name}
+                        <div className={`font-semibold group-hover:text-blue-600 transition-colors ${
+                          isMobile ? 'text-xs' : 'text-sm'
+                        }`}>
+                          {isMobile ? 
+                            (currentProject.name.length > 15 ? currentProject.name.substring(0, 15) + '...' : currentProject.name) :
+                            currentProject.name
+                          }
                         </div>
-                        {currentTour && (
+                        {currentTour && !isMobile && (
                           <div className="text-xs text-gray-500">
                             {currentTour.scenes.length} escena{currentTour.scenes.length !== 1 ? 's' : ''}
                           </div>
@@ -84,22 +95,29 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                       </div>
                     )}
                   </div>
-                  <span className="text-gray-400 group-hover:text-blue-400 transition-colors">
-                    ▼
-                  </span>
+                  {!isMobile && (
+                    <span className="text-gray-400 group-hover:text-blue-400 transition-colors">
+                      ▼
+                    </span>
+                  )}
                 </button>
 
                 {/* Modo actual */}
-                <div className={`px-3 py-1 rounded-full border text-xs font-medium ${getModeColor()}`}>
+                <div className={`rounded-full border font-medium ${getModeColor()} ${
+                  isMobile ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-xs'
+                }`}>
                   <span className="mr-1">{getModeIcon()}</span>
-                  {editorMode === 'edit' ? 'Editando' : 'Previsualización'}
+                  {isMobile ? 
+                    (editorMode === 'edit' ? 'Edit' : 'View') :
+                    (editorMode === 'edit' ? 'Editando' : 'Previsualización')
+                  }
                 </div>
               </div>
             )}
           </div>
 
           {/* Controles de la derecha */}
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-3'}`}>
             {/* Indicador de guardado */}
             <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -117,23 +135,27 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 </div>
               )}
 
-              {/* Compact toggle */}
-              <button
-                onClick={() => setIsCompact(!isCompact)}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-                title={isCompact ? 'Expandir header' : 'Compactar header'}
-              >
-                {isCompact ? '⬇️' : '⬆️'}
-              </button>
+              {/* Compact toggle - Hide on mobile */}
+              {!isMobile && (
+                <button
+                  onClick={() => setIsCompact(!isCompact)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                  title={isCompact ? 'Expandir header' : 'Compactar header'}
+                >
+                  {isCompact ? '⬇️' : '⬆️'}
+                </button>
+              )}
 
               {/* Projects button */}
               <button
                 onClick={onOpenProjects}
-                className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
+                className={`flex items-center gap-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors ${
+                  isMobile ? 'p-2' : 'px-3 py-2'
+                }`}
                 title="Abrir gestor de proyectos (Ctrl+P)"
               >
                 <span>📂</span>
-                {!isCompact && <span className="hidden sm:inline text-sm font-medium">Proyectos</span>}
+                {!isCompact && !isMobile && <span className="hidden sm:inline text-sm font-medium">Proyectos</span>}
               </button>
             </div>
           </div>

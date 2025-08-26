@@ -3,6 +3,7 @@ import { useEditorStore } from '../../stores/editorStore'
 import { useRouteEditorStore } from '../../stores/routeEditorStore'
 import { useTourStore, useCurrentScene } from '../../stores/tourStore'
 import { useProjectStore } from '../../stores/projectStore'
+import { useResponsive } from '../../hooks/useResponsive'
 
 interface SidePanelProps {
   isOpen: boolean
@@ -17,6 +18,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
   side = 'right',
   width = 320
 }) => {
+  const { isMobile, getOptimalPanelWidth } = useResponsive()
   const { mode } = useEditorStore()
   const { isDrawingMode, visibleLayers } = useRouteEditorStore()
   const { currentTour } = useTourStore()
@@ -25,6 +27,9 @@ const SidePanel: React.FC<SidePanelProps> = ({
   
   const [activeTab, setActiveTab] = useState<'scene' | 'tools' | 'info'>('scene')
   const [isPinned, setIsPinned] = useState(false)
+  
+  // Use responsive width
+  const panelWidth = isMobile ? getOptimalPanelWidth() : width
 
   // Auto-hide cuando no está pinned y no hay interacción
   useEffect(() => {
@@ -105,15 +110,17 @@ const SidePanel: React.FC<SidePanelProps> = ({
         className={`side-panel fixed top-0 ${side}-0 h-full bg-white shadow-2xl border-${side === 'left' ? 'r' : 'l'} border-gray-200 z-35 transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : side === 'left' ? '-translate-x-full' : 'translate-x-full'
         }`}
-        style={{ width: `${width}px` }}
+        style={{ width: `${panelWidth}px` }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+        <div className={`flex items-center justify-between border-b border-gray-200 bg-gray-50 ${
+          isMobile ? 'p-3' : 'p-4'
+        }`}>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white text-sm">🏔️</span>
             </div>
-            <span className="font-semibold text-gray-800">Panel</span>
+            <span className={`font-semibold text-gray-800 ${isMobile ? 'text-sm' : ''}`}>Panel</span>
             {mode === 'edit' && (
               <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">
                 Editando

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useProjectStore } from '../../stores/projectStore'
 import { useTourStore } from '../../stores/tourStore'
+import { useResponsive } from '../../hooks/useResponsive'
 import { Project } from '../../stores/projectStore'
 
 interface ProjectListProps {
@@ -26,7 +27,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ onProjectSelect }) => {
   } = useProjectStore()
 
   const { setCurrentTour } = useTourStore()
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const { isMobile, recommendedColumns, currentBreakpoint } = useResponsive()
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(isMobile ? 'list' : 'grid')
 
   const filteredProjects = getFilteredProjects()
 
@@ -103,24 +105,26 @@ const ProjectList: React.FC<ProjectListProps> = ({ onProjectSelect }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 p-6">
+      <div className={`flex-shrink-0 bg-white border-b border-gray-200 ${isMobile ? 'p-4' : 'p-6'}`}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Mis Proyectos</h1>
-            <p className="text-gray-600">{filteredProjects.length} proyectos encontrados</p>
+            <h1 className={`font-bold text-gray-900 ${isMobile ? 'text-xl' : 'text-2xl'}`}>Mis Proyectos</h1>
+            <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-base'}`}>{filteredProjects.length} proyectos encontrados</p>
           </div>
           <button
             onClick={handleCreateProject}
             disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className={`flex items-center gap-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 ${
+              isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'
+            }`}
           >
-            ➕ Nuevo Proyecto
+            {isMobile ? '➕' : '➕ Nuevo Proyecto'}
           </button>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-4">
-          <div className="flex-1 min-w-64">
+        <div className={`${isMobile ? 'space-y-3' : 'flex flex-wrap gap-4'} mb-4`}>
+          <div className={`${isMobile ? 'w-full' : 'flex-1 min-w-64'}`}>
             <input
               type="text"
               placeholder="Buscar proyectos..."
@@ -130,62 +134,67 @@ const ProjectList: React.FC<ProjectListProps> = ({ onProjectSelect }) => {
             />
           </div>
           
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {categories.map(cat => (
-              <option key={cat.value} value={cat.value}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
+          <div className={`${isMobile ? 'grid grid-cols-3 gap-2' : 'flex gap-2'}`}>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {categories.map(cat => (
+                <option key={cat.value} value={cat.value}>
+                  {isMobile ? cat.label.split(' ')[0] : cat.label}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {sortOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {sortOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
 
-          <button
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            title={`Orden: ${sortOrder === 'asc' ? 'Ascendente' : 'Descendente'}`}
-          >
-            {sortOrder === 'asc' ? '↑' : '↓'}
-          </button>
+            <button
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              title={`Orden: ${sortOrder === 'asc' ? 'Ascendente' : 'Descendente'}`}
+            >
+              {sortOrder === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
         </div>
 
-        {/* View toggle */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-colors ${
-              viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            ⊞
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-colors ${
-              viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            ☰
-          </button>
-        </div>
+        {/* View toggle - Hide on mobile */}
+        {!isMobile && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 mr-2">Vista:</span>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              ⊞
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              ☰
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div className={`flex-1 overflow-y-auto ${isMobile ? 'p-4' : 'p-6'}`}>
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
             <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
@@ -223,7 +232,12 @@ const ProjectList: React.FC<ProjectListProps> = ({ onProjectSelect }) => {
         ) : (
           <div className={
             viewMode === 'grid' 
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+              ? `grid gap-6 ${
+                  recommendedColumns === 1 ? 'grid-cols-1' :
+                  recommendedColumns === 2 ? 'grid-cols-2' :
+                  recommendedColumns === 3 ? 'grid-cols-3' :
+                  'grid-cols-4'
+                }`
               : 'space-y-4'
           }>
             {filteredProjects.map(project => (
