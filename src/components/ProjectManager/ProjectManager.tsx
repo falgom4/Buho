@@ -4,6 +4,7 @@ import { useTourStore } from '../../stores/tourStore'
 import { useEditorStore } from '../../stores/editorStore'
 import ProjectList from './ProjectList'
 import SceneManager from '../SceneManager/SceneManager'
+import QuickPresetSelector from '../PresetsManager/QuickPresetSelector'
 import { Tour } from '../../types'
 
 interface ProjectManagerProps {
@@ -150,11 +151,48 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Scene overview */}
-            <div className="flex-1 p-6 overflow-y-auto">
-              {currentProject.tours.length > 0 && currentProject.tours[0].scenes.length > 0 ? (
-                <div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {/* Scene overview with sidebar */}
+            <div className="flex-1 flex">
+              {/* Sidebar with presets */}
+              <div className="w-80 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto">
+                <QuickPresetSelector
+                  selectedCategory={currentProject.category}
+                  onPresetSelect={(preset) => {
+                    updateProject(currentProject.id, {
+                      category: preset.category,
+                      difficulty: preset.difficultyRange,
+                      tags: [...new Set([...currentProject.tags, ...preset.tags])]
+                    })
+                  }}
+                />
+                
+                {/* Project info */}
+                <div className="mt-6 bg-white rounded-lg p-4">
+                  <h3 className="font-medium text-gray-800 mb-3">Información del Proyecto</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Categoría:</span>
+                      <span className="font-medium">{currentProject.category}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Dificultad:</span>
+                      <span className="font-medium">
+                        {currentProject.difficulty.min}-{currentProject.difficulty.max}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Ubicación:</span>
+                      <span className="font-medium">{currentProject.location || 'Sin especificar'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Main content */}
+              <div className="flex-1 p-6 overflow-y-auto">
+                {currentProject.tours.length > 0 && currentProject.tours[0].scenes.length > 0 ? (
+                  <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     {currentProject.tours[0].scenes.map((scene, index) => (
                       <div
                         key={scene.id}
@@ -268,6 +306,7 @@ const ProjectManager: React.FC<ProjectManagerProps> = ({ isOpen, onClose }) => {
                   </button>
                 </div>
               )}
+              </div>
             </div>
           </div>
         ) : (
