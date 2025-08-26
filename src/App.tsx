@@ -2,19 +2,51 @@ import React, { useState, useEffect } from 'react'
 import { useProjectStore } from './stores/projectStore'
 import { useTourStore } from './stores/tourStore'
 import { useEditorStore } from './stores/editorStore'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import { useSidePanels } from './hooks/useSidePanels'
 import TourViewer from './components/TourViewer/TourViewer'
 import ProjectManager from './components/ProjectManager/ProjectManager'
 import WelcomeScreen from './components/WelcomeScreen/WelcomeScreen'
 import AppHeader from './components/Layout/AppHeader'
 import LoadingScreen from './components/Layout/LoadingScreen'
+import ShortcutsHelp from './components/Help/ShortcutsHelp'
+import TourValidator from './components/TourValidator/TourValidator'
+import TourPreview from './components/TourPreview/TourPreview'
 
 function App() {
   const { currentProject, projects } = useProjectStore()
   const { currentTour } = useTourStore()
   const { mode } = useEditorStore()
+  const { togglePanel } = useSidePanels()
+  
   const [showProjectManager, setShowProjectManager] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [showWelcome, setShowWelcome] = useState(false)
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
+  const [showValidator, setShowValidator] = useState(false)
+  const [showFullPreview, setShowFullPreview] = useState(false)
+
+  // Setup keyboard shortcuts
+  useKeyboardShortcuts({
+    onOpenProjects: () => setShowProjectManager(true),
+    onToggleLeftPanel: () => togglePanel('left'),
+    onToggleRightPanel: () => togglePanel('right'),
+    onOpenValidator: () => setShowValidator(true),
+    onOpenPreview: () => setShowFullPreview(true)
+  })
+
+  // Handle F1 key for shortcuts help
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F1') {
+        e.preventDefault()
+        setShowShortcutsHelp(true)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Determinar qué mostrar basado en el estado
   useEffect(() => {
@@ -118,6 +150,28 @@ function App() {
       <ProjectManager
         isOpen={showProjectManager}
         onClose={() => setShowProjectManager(false)}
+      />
+
+      {/* Shortcuts Help */}
+      <ShortcutsHelp
+        isOpen={showShortcutsHelp}
+        onClose={() => setShowShortcutsHelp(false)}
+      />
+
+      {/* Tour Validator */}
+      <TourValidator
+        isOpen={showValidator}
+        onClose={() => setShowValidator(false)}
+      />
+
+      {/* Full Preview */}
+      <TourPreview
+        isOpen={showFullPreview}
+        onClose={() => setShowFullPreview(false)}
+        onEdit={() => {
+          setShowFullPreview(false)
+          // Switch to edit mode if needed
+        }}
       />
     </div>
   )
