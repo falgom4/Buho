@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useTourStore } from '../../stores/tourStore'
 import { useProjectStore } from '../../stores/projectStore'
 import { Scene } from '../../types'
+import SceneImageEditor from './SceneImageEditor'
 
 interface SceneManagerProps {
   isOpen: boolean
@@ -14,6 +15,7 @@ const SceneManager: React.FC<SceneManagerProps> = ({ isOpen, onClose }) => {
   const [draggedScene, setDraggedScene] = useState<string | null>(null)
   const [isAddingScene, setIsAddingScene] = useState(false)
   const [newSceneName, setNewSceneName] = useState('')
+  const [editingScene, setEditingScene] = useState<Scene | null>(null)
 
   if (!isOpen || !currentTour) return null
 
@@ -232,6 +234,13 @@ const SceneManager: React.FC<SceneManagerProps> = ({ isOpen, onClose }) => {
                     {/* Actions */}
                     <div className="flex items-center gap-2">
                       <button
+                        onClick={() => setEditingScene(scene)}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Editar imagen y detalles"
+                      >
+                        📷
+                      </button>
+                      <button
                         onClick={() => {
                           const newName = prompt('Nuevo nombre:', scene.name)
                           if (newName && newName.trim()) {
@@ -282,6 +291,15 @@ const SceneManager: React.FC<SceneManagerProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
+
+      {/* Scene Image Editor Modal */}
+      {editingScene && (
+        <SceneImageEditor
+          scene={editingScene}
+          isOpen={!!editingScene}
+          onClose={() => setEditingScene(null)}
+        />
+      )}
     </div>
   )
 }
