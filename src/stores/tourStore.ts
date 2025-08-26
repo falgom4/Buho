@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Scene, Tour } from '../types'
+import { Scene, Tour, Hotspot } from '../types'
 
 interface TourState {
   currentTour: Tour | null
@@ -10,9 +10,11 @@ interface TourState {
   // Actions
   setCurrentTour: (tour: Tour) => void
   setCurrentScene: (sceneId: string) => void
-  addScene: (scene: Scene) => void
+  addScene: (scene: Omit<Scene, 'id'>) => void
   removeScene: (sceneId: string) => void
   updateScene: (sceneId: string, updates: Partial<Scene>) => void
+  deleteScene: (sceneId: string) => void
+  reorderScenes: (fromIndex: number, toIndex: number) => void
   navigateToScene: (sceneId: string) => void
   
   // Hotspot actions
@@ -88,22 +90,97 @@ export const useTourStore = create<TourState>((set, get) => ({
 
   setCurrentScene: (sceneId) => set({ currentSceneId: sceneId }),
 
-  addScene: (scene) => set((state) => ({
-    scenes: [...state.scenes, scene]
-  })),
+  addScene: (sceneData) => set((state) => {
+    const newScene: Scene = {
+      ...sceneData,
+      id: `scene-${Date.now()}`,
+      description: sceneData.description || '',
+      thumbnail: sceneData.thumbnail || '',
+      hotspots: sceneData.hotspots || [],
+      routes: sceneData.routes || [],
+      metadata: {
+        capturedAt: new Date().toISOString(),
+        location: '',
+        weather: '',
+        equipment: [],
+        ...sceneData.metadata
+      }
+    }
+    
+    const updatedScenes = [...state.scenes, newScene]
+    const updatedTour = state.currentTour ? {
+      ...state.currentTour,
+      scenes: updatedScenes
+    } : null
+    
+    return {
+      scenes: updatedScenes,
+      currentTour: updatedTour
+    }
+  }),
 
-  removeScene: (sceneId) => set((state) => ({
-    scenes: state.scenes.filter(scene => scene.id !== sceneId),
-    currentSceneId: state.currentSceneId === sceneId 
-      ? state.scenes[0]?.id || null 
-      : state.currentSceneId
-  })),
+  removeScene: (sceneId) => set((state) => {
+    const updatedScenes = state.scenes.filter(scene => scene.id !== sceneId)
+    const updatedTour = state.currentTour ? {
+      ...state.currentTour,
+      scenes: updatedScenes
+    } : null
+    
+    return {
+      scenes: updatedScenes,
+      currentTour: updatedTour,
+      currentSceneId: state.currentSceneId === sceneId 
+        ? updatedScenes[0]?.id || null 
+        : state.currentSceneId
+    }
+  }),
+  
+  deleteScene: (sceneId) => set((state) => {
+    const updatedScenes = state.scenes.filter(scene => scene.id !== sceneId)
+    const updatedTour = state.currentTour ? {
+      ...state.currentTour,
+      scenes: updatedScenes
+    } : null
+    
+    return {
+      scenes: updatedScenes,
+      currentTour: updatedTour,
+      currentSceneId: state.currentSceneId === sceneId 
+        ? updatedScenes[0]?.id || null 
+        : state.currentSceneId
+    }
+  }),
+  
+  reorderScenes: (fromIndex, toIndex) => set((state) => {
+    const newScenes = [...state.scenes]
+    const [movedScene] = newScenes.splice(fromIndex, 1)
+    newScenes.splice(toIndex, 0, movedScene)
+    
+    const updatedTour = state.currentTour ? {
+      ...state.currentTour,
+      scenes: newScenes
+    } : null
+    
+    return {
+      scenes: newScenes,
+      currentTour: updatedTour
+    }
+  }),
 
-  updateScene: (sceneId, updates) => set((state) => ({
-    scenes: state.scenes.map(scene => 
+  updateScene: (sceneId, updates) => set((state) => {
+    const updatedScenes = state.scenes.map(scene => 
       scene.id === sceneId ? { ...scene, ...updates } : scene
     )
-  })),
+    const updatedTour = state.currentTour ? {
+      ...state.currentTour,
+      scenes: updatedScenes
+    } : null
+    
+    return {
+      scenes: updatedScenes,
+      currentTour: updatedTour
+    }
+  }),
 
   navigateToScene: (sceneId) => {
     const { scenes } = get()
@@ -119,16 +196,25 @@ export const useTourStore = create<TourState>((set, get) => ({
     }
   },
 
-  addHotspotToScene: (sceneId, hotspot) => set((state) => ({
-    scenes: state.scenes.map(scene => 
+  addHotspotToScene: (sceneId, hotspot) => set((state) => {
+    const updatedScenes = state.scenes.map(scene => 
       scene.id === sceneId 
         ? { ...scene, hotspots: [...scene.hotspots, hotspot] }
         : scene
     )
-  })),
+    const updatedTour = state.currentTour ? {
+      ...state.currentTour,
+      scenes: updatedScenes
+    } : null
+    
+    return {
+      scenes: updatedScenes,
+      currentTour: updatedTour
+    }
+  }),
 
-  updateHotspot: (sceneId, hotspotId, updates) => set((state) => ({
-    scenes: state.scenes.map(scene => 
+  updateHotspot: (sceneId, hotspotId, updates) => set((state) => {
+    const updatedScenes = state.scenes.map(scene => 
       scene.id === sceneId 
         ? {
             ...scene, 
@@ -138,15 +224,33 @@ export const useTourStore = create<TourState>((set, get) => ({
           }
         : scene
     )
-  })),
+    const updatedTour = state.currentTour ? {
+      ...state.currentTour,
+      scenes: updatedScenes
+    } : null
+    
+    return {
+      scenes: updatedScenes,
+      currentTour: updatedTour
+    }
+  }),
 
-  removeHotspot: (sceneId, hotspotId) => set((state) => ({
-    scenes: state.scenes.map(scene => 
+  removeHotspot: (sceneId, hotspotId) => set((state) => {
+    const updatedScenes = state.scenes.map(scene => 
       scene.id === sceneId 
         ? { ...scene, hotspots: scene.hotspots.filter(h => h.id !== hotspotId) }
         : scene
     )
-  }))
+    const updatedTour = state.currentTour ? {
+      ...state.currentTour,
+      scenes: updatedScenes
+    } : null
+    
+    return {
+      scenes: updatedScenes,
+      currentTour: updatedTour
+    }
+  })
 }))
 
 // Selector helpers

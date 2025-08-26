@@ -124,8 +124,14 @@ const EditorToolbar: React.FC = () => {
             ❌ Cancelar
           </button>
         )}
+        </div>
       </div>
-    </div>
+      
+      <ProjectManager 
+        isOpen={showProjectManager}
+        onClose={() => setShowProjectManager(false)}
+      />
+    </>
   )
 }
 
