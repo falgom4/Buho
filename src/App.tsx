@@ -10,19 +10,29 @@ import WelcomeScreen from './components/WelcomeScreen/WelcomeScreen'
 import AppHeader from './components/Layout/AppHeader'
 import LoadingScreen from './components/Layout/LoadingScreen'
 import ShortcutsHelp from './components/Help/ShortcutsHelp'
+import HelpCenter from './components/Help/HelpCenter'
+import GuidedTour from './components/Onboarding/GuidedTour'
 import TourValidator from './components/TourValidator/TourValidator'
 import TourPreview from './components/TourPreview/TourPreview'
+import { useGuidedTour } from './hooks/useGuidedTour'
 
 function App() {
   const { currentProject, projects } = useProjectStore()
   const { currentTour } = useTourStore()
   const { mode } = useEditorStore()
   const { togglePanel } = useSidePanels()
+  const {
+    currentTour: guidedTour,
+    isActive: isGuidedTourActive,
+    completeTour,
+    skipTour
+  } = useGuidedTour()
   
   const [showProjectManager, setShowProjectManager] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [showWelcome, setShowWelcome] = useState(false)
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
+  const [showHelpCenter, setShowHelpCenter] = useState(false)
   const [showValidator, setShowValidator] = useState(false)
   const [showFullPreview, setShowFullPreview] = useState(false)
 
@@ -35,12 +45,12 @@ function App() {
     onOpenPreview: () => setShowFullPreview(true)
   })
 
-  // Handle F1 key for shortcuts help
+  // Handle F1 key for help center
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F1') {
         e.preventDefault()
-        setShowShortcutsHelp(true)
+        setShowHelpCenter(true)
       }
     }
 
@@ -102,6 +112,7 @@ function App() {
         currentTour={currentTour}
         editorMode={mode}
         onOpenProjects={() => setShowProjectManager(true)}
+        onOpenHelp={() => setShowHelpCenter(true)}
       />
 
       {/* Main content */}
@@ -157,6 +168,23 @@ function App() {
         isOpen={showShortcutsHelp}
         onClose={() => setShowShortcutsHelp(false)}
       />
+
+      {/* Help Center */}
+      <HelpCenter
+        isOpen={showHelpCenter}
+        onClose={() => setShowHelpCenter(false)}
+      />
+
+      {/* Guided Tour */}
+      {guidedTour && (
+        <GuidedTour
+          isActive={isGuidedTourActive}
+          onComplete={completeTour}
+          onSkip={skipTour}
+          steps={guidedTour.steps}
+          tourId={guidedTour.id}
+        />
+      )}
 
       {/* Tour Validator */}
       <TourValidator

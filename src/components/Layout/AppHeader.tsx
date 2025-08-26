@@ -8,13 +8,15 @@ interface AppHeaderProps {
   currentTour: Tour | null
   editorMode: 'preview' | 'edit'
   onOpenProjects: () => void
+  onOpenHelp?: () => void
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
   currentProject,
   currentTour,
   editorMode,
-  onOpenProjects
+  onOpenProjects,
+  onOpenHelp
 }) => {
   const { isMobile, isTablet } = useResponsive()
   const [isCompact, setIsCompact] = useState(isMobile)
@@ -30,9 +32,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   }
 
   return (
-    <header className={`bg-white border-b border-gray-200 transition-all duration-200 ${
-      isCompact ? 'py-2' : 'py-4'
-    }`}>
+    <header 
+      id="app-header"
+      className={`bg-white border-b border-gray-200 transition-all duration-200 ${
+        isCompact ? 'py-2' : 'py-4'
+      }`}
+    >
       <div className={`max-w-7xl mx-auto ${isMobile ? 'px-4' : 'px-6'}`}>
         <div className="flex items-center justify-between">
           {/* Logo y proyecto actual */}
@@ -146,6 +151,20 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 </button>
               )}
 
+              {/* Help button */}
+              {onOpenHelp && (
+                <button
+                  onClick={onOpenHelp}
+                  className={`flex items-center gap-2 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors ${
+                    isMobile ? 'p-2' : 'px-3 py-2'
+                  }`}
+                  title="Centro de ayuda (F1)"
+                >
+                  <span>❓</span>
+                  {!isCompact && !isMobile && <span className="hidden sm:inline text-sm font-medium">Ayuda</span>}
+                </button>
+              )}
+
               {/* Projects button */}
               <button
                 onClick={onOpenProjects}
@@ -153,6 +172,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                   isMobile ? 'p-2' : 'px-3 py-2'
                 }`}
                 title="Abrir gestor de proyectos (Ctrl+P)"
+                id="projects-button"
               >
                 <span>📂</span>
                 {!isCompact && !isMobile && <span className="hidden sm:inline text-sm font-medium">Proyectos</span>}
